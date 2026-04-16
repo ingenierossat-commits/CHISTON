@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CHISTÓN</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#F5C518">
+  <link rel="apple-touch-icon" href="icon512.png">
+  <link rel="icon" href="icon512.png">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #1a1a2e;
+      --bg2:     #16213e;
+      --bg3:     #0f3460;
+      --yellow:  #F5C518;
+      --yellow2: #FFD700;
+      --green:   #4ade80;
+      --pink:    #f472b6;
+      --orange:  #fb923c;
+      --white:   #ffffff;
+      --dim:     #a0aec0;
+      --border:  rgba(245,197,24,0.25);
+      --r:       12px;
+    }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--bg2);
+      border-bottom: 3px solid var(--yellow);
+      padding: 0 1.5rem;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; text-decoration: none;
+    }
+    .logo-text {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      background: linear-gradient(135deg, #F5C518, #FFD700, #fb923c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+    .logo-emoji { font-size: 1.8rem; }
+    .breadcrumb {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.8rem; font-weight: 700; color: var(--dim);
+    }
+    .bc-item { cursor: pointer; transition: color 0.2s; }
+    .bc-item:hover, .bc-item.active { color: var(--yellow); }
+    .bc-sep { color: var(--bg3); }
+
+    /* ── SCREENS ── */
+    main { max-width: 900px; margin: 0 auto; padding: 2rem 1.2rem 4rem; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── HOME ── */
+    .home-header {
+      text-align: center;
+      padding: 1.5rem 0 2rem;
+    }
+    .home-header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #F5C518, #fb923c, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.3rem;
+    }
+    .home-header p { font-size: 0.95rem; color: var(--dim); font-weight: 600; }
+
+    /* ── TEMAS GRID ── */
+    .temas-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.2rem;
+    }
+    .temas-count { font-size: 0.8rem; color: var(--dim); font-weight: 600; }
+    .temas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+    .tema-card {
+      background: var(--bg2);
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      padding: 1.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.7rem;
+      text-align: center;
+      min-height: 100px;
+      position: relative;
+    }
+    .tema-card:hover { border-color: var(--yellow); background: var(--bg3); transform: translateY(-2px); }
+    .tema-card.selected { border-color: var(--yellow); background: var(--bg3); }
+    .tema-emoji { font-size: 2rem; }
+    .tema-nombre {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      color: var(--white);
+      letter-spacing: 1px;
+      line-height: 1.3;
+    }
+    .tema-count { font-size: 0.72rem; color: var(--dim); font-weight: 700; }
+    .tema-options {
+      display: none;
+      flex-direction: column;
+      gap: 0.4rem;
+      width: 100%;
+      margin-top: 0.3rem;
+    }
+    .tema-card.selected .tema-options { display: flex; }
+    .tema-opt {
+      width: 100%; padding: 0.4rem 0.5rem;
+      border-radius: 8px; font-family: 'Nunito', sans-serif;
+      font-size: 0.72rem; font-weight: 800;
+      letter-spacing: 0.05em; cursor: pointer; border: none;
+      transition: all 0.15s;
+    }
+    .tema-opt-enter  { background: var(--yellow); color: #1a1a2e; }
+    .tema-opt-enter:hover  { background: var(--yellow2); }
+    .tema-opt-edit   { background: transparent; color: var(--dim); border: 1px solid rgba(160,174,192,0.3); }
+    .tema-opt-edit:hover   { color: var(--white); border-color: var(--dim); }
+    .tema-opt-delete { background: transparent; color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+    .tema-opt-delete:hover { background: rgba(248,113,113,0.1); border-color: #f87171; }
+
+    /* ADD TEMA CARD */
+    .tema-add-card {
+      background: transparent;
+      border: 2px dashed rgba(245,197,24,0.3);
+      border-radius: var(--r);
+      padding: 1.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 100px;
+      color: var(--yellow);
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+    .tema-add-card:hover { border-color: var(--yellow); background: rgba(245,197,24,0.05); }
+    .tema-add-icon { font-size: 2rem; }
+
+    /* ── CHISTES ── */
+    .page-hdr {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem; padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .page-hdr h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.8rem;
+      color: var(--yellow);
+      letter-spacing: 1px;
+    }
+    .page-sub { font-size: 0.78rem; color: var(--dim); font-weight: 600; margin-top: 0.2rem; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.78rem; font-weight: 800; letter-spacing: 0.05em;
+      color: var(--dim); cursor: pointer; transition: color 0.2s;
+      background: none; border: none; margin-bottom: 1.2rem;
+      padding: 0; font-family: 'Nunito', sans-serif;
+    }
+    .back-btn:hover { color: var(--yellow); }
+
+    /* CHISTES LISTA */
+    .chistes-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .chiste-row {
+      background: var(--bg2);
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .chiste-row:hover { border-color: rgba(245,197,24,0.5); }
+    .chiste-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.2rem; cursor: pointer; user-select: none;
+      transition: background 0.2s;
+    }
+    .chiste-hdr:hover { background: var(--bg3); }
+    .chiste-hdr-left { display: flex; align-items: center; gap: 0.8rem; }
+    .chiste-chevron { font-size: 0.7rem; color: var(--yellow); transition: transform 0.2s; }
+    .chiste-row.open .chiste-chevron { transform: rotate(90deg); }
+    .chiste-nombre { font-size: 1rem; font-weight: 800; color: var(--white); }
+    .chiste-acts { display: flex; gap: 0.4rem; }
+    .chiste-body {
+      display: none;
+      padding: 0 1.2rem 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+    .chiste-row.open .chiste-body { display: block; }
+    .chiste-texto {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem; font-weight: 600;
+      line-height: 1.7; color: #e2e8f0;
+      margin-top: 0.8rem;
+      white-space: pre-wrap;
+    }
+
+    /* ADD CHISTE BOTÓN */
+    .btn-add-chiste {
+      margin-top: 1.5rem;
+      width: 100%; padding: 1rem;
+      background: transparent;
+      border: 2px dashed rgba(245,197,24,0.3);
+      border-radius: var(--r);
+      color: var(--yellow);
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem; letter-spacing: 1px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-add-chiste:hover { border-color: var(--yellow); background: rgba(245,197,24,0.05); }
+
+    /* ── BOTONES GENERALES ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.45rem 0.8rem; border-radius: 8px;
+      font-family: 'Nunito', sans-serif; font-size: 0.75rem;
+      font-weight: 800; cursor: pointer; border: none;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--yellow); color: #1a1a2e; }
+    .btn-primary:hover { background: var(--yellow2); }
+    .btn-ghost { background: transparent; color: var(--dim); border: 1px solid rgba(160,174,192,0.3); }
+    .btn-ghost:hover { color: var(--white); border-color: var(--dim); }
+    .btn-danger { background: transparent; color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+    .btn-danger:hover { background: rgba(248,113,113,0.1); border-color: #f87171; }
+    .btn-row { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; margin-top: 1.2rem; }
+
+    /* ── MODALES ── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 500; display: none;
+      align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--bg2);
+      border: 2px solid var(--yellow);
+      border-radius: var(--r);
+      padding: 1.8rem;
+      width: 100%; max-width: 500px;
+      box-shadow: 0 0 40px rgba(245,197,24,0.2);
+    }
+    .modal-hdr {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.3rem; padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-hdr h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2rem; color: var(--yellow); letter-spacing: 1px;
+    }
+    .btn-close { background: none; border: none; color: var(--dim); font-size: 1.2rem; cursor: pointer; }
+    .btn-close:hover { color: var(--white); }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    label { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+    input[type="text"] {
+      padding: 0.7rem 1rem;
+      background: var(--bg3);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem; font-weight: 600;
+      outline: none; width: 100%;
+    }
+    input[type="text"]:focus { border-color: var(--yellow); }
+    textarea.chiste-input {
+      width: 100%; min-height: 140px;
+      padding: 0.8rem 1rem;
+      background: var(--bg3);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem; font-weight: 600;
+      outline: none; resize: vertical; line-height: 1.6;
+    }
+    textarea.chiste-input:focus { border-color: var(--yellow); }
+    textarea.chiste-input::placeholder { color: var(--dim); font-style: italic; }
+
+    /* VOZ */
+    .voice-row { display: flex; gap: 0.6rem; align-items: flex-start; }
+    .voice-row textarea { flex: 1; }
+    .btn-mic {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: var(--bg3);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1.2rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .btn-mic:hover { border-color: var(--yellow); }
+    .btn-mic.recording { border-color: #f87171; background: rgba(248,113,113,0.15); animation: micPulse 1s infinite; }
+    @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0.4)} 50%{box-shadow:0 0 0 6px rgba(248,113,113,0)} }
+
+    /* CUÉNTAME */
+    .btn-cuentame {
+      background: linear-gradient(135deg, var(--pink), var(--orange));
+      color: #fff; border: none; border-radius: 10px;
+      padding: 0.55rem 1.2rem;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem; letter-spacing: 1px;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(244,114,182,0.3);
+    }
+    .btn-cuentame:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(244,114,182,0.4); }
+
+    /* SUBIR ARRIBA */
+    .btn-subir-top {
+      background: transparent; border: 2px solid rgba(245,197,24,0.4);
+      border-radius: 8px; padding: 0.45rem 0.9rem;
+      color: var(--yellow); font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem; font-weight: 800; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-subir-top:hover { border-color: var(--yellow); background: rgba(245,197,24,0.08); }
+
+    /* CHECK en chiste-hdr */
+    .chiste-check {
+      width: 18px; height: 18px;
+      accent-color: var(--yellow);
+      cursor: pointer; flex-shrink: 0;
+    }
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--dim); }
+    .empty-icon { font-size: 3rem; margin-bottom: 0.8rem; display: block; }
+    .empty h3 { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--dim); }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg2); border: 2px solid var(--yellow);
+      border-radius: 10px; padding: 0.8rem 1.5rem;
+      font-size: 0.85rem; font-weight: 800;
+      color: var(--yellow); opacity: 0;
+      transition: all 0.3s; pointer-events: none;
+      z-index: 999; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.err { border-color: #f87171; color: #f87171; }
+
+    /* SPINNER */
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(245,197,24,0.3); border-top-color: var(--yellow);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 500px) {
+      header { padding: 0 1rem; }
+      .logo-text { font-size: 1.6rem; }
+      main { padding: 1.2rem 0.8rem 3rem; }
+      .temas-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo" id="logo-btn">
+    <span class="logo-text">CHISTÓN</span>
+  </div>
+  <div class="breadcrumb" id="bc"></div>
+</header>
+
+<main>
+
+  <!-- HOME: TEMAS -->
+  <div class="screen active" id="s-home">
+    <div class="home-header">
+      <h1>TEMÁTICA</h1>
+      <p>Toca un tema para ver sus chistes</p>
+    </div>
+    <div class="temas-header">
+      <div class="temas-count" id="temas-count">Cargando...</div>
+      <button class="btn-cuentame" id="btn-cuentame">🎤 Cuéntame</button>
+    </div>
+    <div class="temas-grid" id="temas-grid">
+      <div style="text-align:center;padding:2rem;grid-column:1/-1;color:var(--dim)">
+        <span class="spinner"></span> Cargando...
+      </div>
+    </div>
+  </div>
+
+  <!-- CHISTES -->
+  <div class="screen" id="s-chistes">
+    <button class="back-btn" id="back-chistes">← Volver a temas</button>
+    <div class="page-hdr">
+      <div>
+        <h1 id="tema-title">TEMA</h1>
+        <div class="page-sub" id="tema-sub"></div>
+      </div>
+      <button class="btn-subir-top" id="btn-subir-top" title="Subir seleccionado arriba">⬆ Subir arriba</button>
+    </div>
+    <div class="chistes-list" id="chistesList"></div>
+    <button class="btn-add-chiste" id="btn-add-chiste">＋ Añadir chiste</button>
+  </div>
+
+</main>
+
+<!-- MODAL NUEVO/EDITAR TEMA -->
+<div class="modal-backdrop" id="m-tema">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="m-tema-titulo">Nuevo tema</h3>
+      <button class="btn-close" id="close-m-tema">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre del tema</label>
+      <input type="text" id="inp-tema" placeholder="Ej: CURAS, MÉDICOS, POLÍTICOS...">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-save-tema">Guardar</button>
+      <button class="btn btn-ghost" id="btn-cancel-tema">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO/EDITAR CHISTE -->
+<div class="modal-backdrop" id="m-chiste">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="m-chiste-titulo">Nuevo chiste</h3>
+      <button class="btn-close" id="close-m-chiste">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre / título</label>
+      <input type="text" id="inp-chiste-nombre" placeholder="Ej: El cura y el taxi">
+    </div>
+    <div class="form-group">
+      <label>El chiste</label>
+      <div class="voice-row">
+        <textarea class="chiste-input" id="inp-chiste-texto" placeholder="Escribe el chiste aquí o usa el micrófono..."></textarea>
+        <button class="btn-mic" id="btn-mic-chiste" title="Dictar por voz">🎙</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-save-chiste">Guardar</button>
+      <button class="btn btn-ghost" id="btn-cancel-chiste">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, set, push, remove, onValue }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const FB = {
+  apiKey:            "AIzaSyChMXx5ZcleAo5oqzPvo1K_Af_wgQkh-LQ",
+  authDomain:        "listify-16b5d.firebaseapp.com",
+  databaseURL:       "https://listify-16b5d-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "listify-16b5d",
+  storageBucket:     "listify-16b5d.appspot.com",
+  messagingSenderId: "238610923350",
+  appId:             "1:238610923350:web:cd5c2c3fb23b5c0afba0f7"
+};
+const app = initializeApp(FB);
+const db  = getDatabase(app);
+
+// ── ESTADO ────────────────────────────────────────────────────
+let temasData       = {};
+let currentTemaKey  = null;
+let editTemaKey     = null;
+let editChisteKey   = null;
+let selectedTemaKey = null;
+let isRecording     = false;
+let recognition     = null;
+
+const R = {
+  temas:       ()    => ref(db, 'chiston/temas'),
+  tema:        k     => ref(db, `chiston/temas/${k}`),
+  temaNombre:  k     => ref(db, `chiston/temas/${k}/nombre`),
+  chistes:     k     => ref(db, `chiston/temas/${k}/chistes`),
+  chiste:      (k,c) => ref(db, `chiston/temas/${k}/chistes/${c}`)
+};
+
+// ── UTILS ─────────────────────────────────────────────────────
+let _toastT;
+function toast(msg, tipo='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show' + (tipo==='err'?' err':'');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.remove('show'), 2800);
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function setBreadcrumb(items) {
+  const bc = document.getElementById('bc');
+  if (!items.length) { bc.innerHTML = ''; return; }
+  bc.innerHTML = items.map((item,i) => {
+    const isLast = i === items.length-1;
+    return `<span class="bc-item${isLast?' active':''}" data-idx="${i}">${item.label}</span>${isLast?'':'<span class="bc-sep">›</span>'}`;
+  }).join('');
+  bc.querySelectorAll('.bc-item').forEach(el =>
+    el.addEventListener('click', () => items[parseInt(el.dataset.idx)].action()));
+}
+
+// Emojis aleatorios para temas
+const EMOJIS = ['😂','🤣','😆','😄','🎭','🃏','🎪','🤡','🎠','🎈','⭐','🌟','💥','🎯','🎲'];
+function emojiForTema(nombre) {
+  let h = 0;
+  for (let i=0; i<nombre.length; i++) h = (h*31 + nombre.charCodeAt(i)) & 0xFFFF;
+  return EMOJIS[h % EMOJIS.length];
+}
+
+// ── FIREBASE ──────────────────────────────────────────────────
+function suscribir() {
+  onValue(R.temas(), snap => {
+    temasData = snap.val() || {};
+    renderTemas();
+    if (currentTemaKey && document.getElementById('s-chistes').classList.contains('active'))
+      renderChistes();
+  });
+}
+
+// ── RENDER TEMAS ──────────────────────────────────────────────
+function renderTemas() {
+  const grid = document.getElementById('temas-grid');
+  const items = Object.entries(temasData).sort(([,a],[,b]) => a.nombre.localeCompare(b.nombre));
+  document.getElementById('temas-count').textContent = items.length + ' tema' + (items.length!==1?'s':'');
+
+  grid.innerHTML = '';
+
+  items.forEach(([key, t]) => {
+    const nChistes = Object.keys(t.chistes || {}).length;
+    const card = document.createElement('div');
+    card.className = 'tema-card' + (key===selectedTemaKey?' selected':'');
+    card.dataset.key = key;
+    card.innerHTML = `
+      <div class="tema-emoji">${emojiForTema(t.nombre)}</div>
+      <div class="tema-nombre">${t.nombre}</div>
+      <div class="tema-count">${nChistes} chiste${nChistes!==1?'s':''}</div>
+      <div class="tema-options">
+        <button class="tema-opt tema-opt-enter">▶ Ver chistes</button>
+        <button class="tema-opt tema-opt-edit">✏️ Editar</button>
+        <button class="tema-opt tema-opt-delete">🗑️ Eliminar</button>
+      </div>`;
+
+    card.addEventListener('click', e => {
+      if (e.target.closest('.tema-options')) return;
+      if (selectedTemaKey === key) {
+        selectedTemaKey = null;
+        card.classList.remove('selected');
+      } else {
+        selectedTemaKey = key;
+        grid.querySelectorAll('.tema-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+      }
+    });
+    card.querySelector('.tema-opt-enter').addEventListener('click',  e => { e.stopPropagation(); selectedTemaKey=null; goTema(key); });
+    card.querySelector('.tema-opt-edit').addEventListener('click',   e => { e.stopPropagation(); openEditTema(key, t.nombre); });
+    card.querySelector('.tema-opt-delete').addEventListener('click', e => { e.stopPropagation(); selectedTemaKey=null; deleteTema(key, t.nombre); });
+    grid.appendChild(card);
+  });
+
+  // Tarjeta + añadir
+  const addCard = document.createElement('div');
+  addCard.className = 'tema-add-card';
+  addCard.innerHTML = `<span class="tema-add-icon">＋</span><span>Nuevo tema</span>`;
+  addCard.addEventListener('click', openModalTema);
+  grid.appendChild(addCard);
+}
+
+// ── RENDER CHISTES ────────────────────────────────────────────
+function goTema(key) {
+  currentTemaKey = key;
+  const tema = temasData[key];
+  if (!tema) return;
+  document.getElementById('tema-title').textContent = tema.nombre;
+  setBreadcrumb([
+    { label: 'Temas', action: goHome },
+    { label: tema.nombre, action: () => goTema(key) }
+  ]);
+  renderChistes();
+  showScreen('s-chistes');
+}
+
+function goHome() {
+  currentTemaKey = null;
+  setBreadcrumb([]);
+  showScreen('s-home');
+}
+
+function renderChistes() {
+  const tema = temasData[currentTemaKey];
+  if (!tema) return;
+  const chistes = tema.chistes || {};
+  const items   = Object.entries(chistes).sort(([,a],[,b]) => (a.orden??a.ts??0)-(b.orden??b.ts??0));
+  document.getElementById('tema-sub').textContent = items.length + ' chiste' + (items.length!==1?'s':'');
+  const list = document.getElementById('chistesList');
+  list.innerHTML = '';
+
+  if (!items.length) {
+    list.innerHTML = '<div class="empty"><span class="empty-icon">🦗</span><h3>No hay chistes aún</h3></div>';
+    return;
+  }
+
+  items.forEach(([cKey, c]) => {
+    const row = document.createElement('div');
+    row.className = 'chiste-row'; row.id = 'chiste-' + cKey;
+    row.innerHTML = `
+      <div class="chiste-hdr">
+        <div class="chiste-hdr-left">
+          <input type="checkbox" class="chiste-check" data-key="${cKey}" title="Seleccionar para subir">
+          <span class="chiste-chevron">▶</span>
+          <span class="chiste-nombre">${c.nombre}</span>
+        </div>
+        <div class="chiste-acts">
+          <button class="btn btn-ghost" title="Editar">✏️</button>
+          <button class="btn btn-danger" title="Eliminar">🗑️</button>
+        </div>
+      </div>
+      <div class="chiste-body">
+        <div class="chiste-texto">${(c.texto||'').replace(/</g,'&lt;')}</div>
+      </div>`;
+
+    // Check exclusivo — solo uno activo
+    const chk = row.querySelector('.chiste-check');
+    if (cKey === selectedChisteKey) chk.checked = true;
+    chk.addEventListener('change', () => {
+      if (chk.checked) {
+        // Desactivar todos los demás
+        document.querySelectorAll('.chiste-check').forEach(c => { if (c !== chk) c.checked = false; });
+        selectedChisteKey = cKey;
+      } else {
+        selectedChisteKey = null;
+      }
+    });
+
+    // Expandir al tocar (no en checkbox ni botones)
+    row.querySelector('.chiste-hdr').addEventListener('click', e => {
+      if (e.target.closest('.chiste-acts') || e.target.classList.contains('chiste-check')) return;
+      desactivarCheck();
+      row.classList.toggle('open');
+    });
+
+    const acts = row.querySelector('.chiste-acts');
+    acts.addEventListener('click', e => e.stopPropagation());
+    acts.querySelector('.btn-ghost').addEventListener('click',  () => { desactivarCheck(); openEditChiste(cKey, c); });
+    acts.querySelector('.btn-danger').addEventListener('click', () => { desactivarCheck(); deleteChiste(cKey, c.nombre); });
+    list.appendChild(row);
+  });
+}
+
+// ── SUBIR CHISTE UNA POSICIÓN ─────────────────────────────────
+let selectedChisteKey = null;  // key del chiste con check activo
+
+async function subirUnaPos() {
+  if (!selectedChisteKey) { toast('⚠ Selecciona un chiste primero', 'err'); return; }
+
+  const tema   = temasData[currentTemaKey];
+  const chistes = tema?.chistes || {};
+  const items  = Object.entries(chistes)
+    .sort(([,a],[,b]) => (a.orden ?? a.ts ?? 0) - (b.orden ?? b.ts ?? 0));
+
+  const idx = items.findIndex(([k]) => k === selectedChisteKey);
+  if (idx <= 0) { toast('Ya está el primero 👆', 'err'); return; }
+
+  // Intercambiar orden con el anterior
+  const [keyA, cA] = items[idx - 1];
+  const [keyB, cB] = items[idx];
+  const ordenA = cA.orden ?? idx - 1;
+  const ordenB = cB.orden ?? idx;
+
+  await set(ref(db, `chiston/temas/${currentTemaKey}/chistes/${keyA}/orden`), ordenB);
+  await set(ref(db, `chiston/temas/${currentTemaKey}/chistes/${keyB}/orden`), ordenA);
+
+  // El check sigue activo — no lo desactivamos aquí
+  toast('⬆ Subido una posición');
+}
+
+function desactivarCheck() {
+  selectedChisteKey = null;
+  document.querySelectorAll('.chiste-check').forEach(c => c.checked = false);
+}
+
+// ── CRUD TEMAS ────────────────────────────────────────────────
+function openModalTema() {
+  editTemaKey = null;
+  document.getElementById('m-tema-titulo').textContent = 'Nuevo tema 🎭';
+  document.getElementById('inp-tema').value = '';
+  openModal('m-tema');
+  setTimeout(() => document.getElementById('inp-tema').focus(), 150);
+}
+function openEditTema(key, nombre) {
+  editTemaKey = key;
+  document.getElementById('m-tema-titulo').textContent = 'Editar tema ✏️';
+  document.getElementById('inp-tema').value = nombre;
+  openModal('m-tema');
+  setTimeout(() => document.getElementById('inp-tema').focus(), 150);
+}
+async function saveTema() {
+  const nombre = document.getElementById('inp-tema').value.trim().toUpperCase();
+  if (!nombre) return;
+  const dupl = Object.entries(temasData).some(([k,t]) => t.nombre===nombre && k!==editTemaKey);
+  if (dupl) { toast(`⚠ Ya existe "${nombre}"`, 'err'); return; }
+  if (editTemaKey) {
+    await set(R.temaNombre(editTemaKey), nombre);
+    toast('✓ Tema actualizado');
+  } else {
+    await push(R.temas(), { nombre, chistes: {} });
+    toast('✓ Tema creado 🎉');
+  }
+  closeModal('m-tema');
+}
+async function deleteTema(key, nombre) {
+  if (!confirm(`¿Eliminar el tema "${nombre}" y todos sus chistes?`)) return;
+  await remove(R.tema(key));
+  toast('🗑 Tema eliminado');
+}
+
+// ── CRUD CHISTES ──────────────────────────────────────────────
+function openModalChiste() {
+  editChisteKey = null;
+  desactivarCheck();
+  document.getElementById('m-chiste-titulo').textContent = 'Nuevo chiste 😂';
+  document.getElementById('inp-chiste-nombre').value = '';
+  document.getElementById('inp-chiste-texto').value  = '';
+  openModal('m-chiste');
+  setTimeout(() => document.getElementById('inp-chiste-nombre').focus(), 150);
+}
+function openEditChiste(key, c) {
+  editChisteKey = key;
+  document.getElementById('m-chiste-titulo').textContent = 'Editar chiste ✏️';
+  document.getElementById('inp-chiste-nombre').value = c.nombre || '';
+  document.getElementById('inp-chiste-texto').value  = c.texto  || '';
+  openModal('m-chiste');
+  setTimeout(() => document.getElementById('inp-chiste-nombre').focus(), 150);
+}
+async function saveChiste() {
+  const nombre = document.getElementById('inp-chiste-nombre').value.trim();
+  const texto  = document.getElementById('inp-chiste-texto').value.trim();
+  if (!nombre) { toast('⚠ Escribe un nombre', 'err'); return; }
+  if (!texto)  { toast('⚠ Escribe el chiste', 'err'); return; }
+  if (editChisteKey) {
+    await set(R.chiste(currentTemaKey, editChisteKey), { nombre, texto, ts: Date.now() });
+    toast('✓ Chiste actualizado');
+  } else {
+    await push(R.chistes(currentTemaKey), { nombre, texto, ts: Date.now() });
+    toast('✓ Chiste guardado 😄');
+  }
+  closeModal('m-chiste');
+}
+async function deleteChiste(key, nombre) {
+  if (!confirm(`¿Eliminar "${nombre}"?`)) return;
+  await remove(R.chiste(currentTemaKey, key));
+  toast('🗑 Chiste eliminado');
+}
+
+// ── VOZ ───────────────────────────────────────────────────────
+function toggleVoz() {
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+    toast('⚠ Tu navegador no soporta voz. Usa Chrome.', 'err'); return;
+  }
+  if (isRecording) { if (recognition) recognition.stop(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'es-ES'; recognition.continuous = false; recognition.interimResults = true;
+  const btn = document.getElementById('btn-mic-chiste');
+  recognition.onstart = () => {
+    isRecording = true; btn.classList.add('recording'); btn.textContent = '🔴';
+  };
+  recognition.onresult = e => {
+    let t = '';
+    for (let i=e.resultIndex; i<e.results.length; i++) t += e.results[i][0].transcript;
+    document.getElementById('inp-chiste-texto').value = t;
+  };
+  recognition.onend = () => {
+    isRecording = false; btn.classList.remove('recording'); btn.textContent = '🎙';
+    recognition = null;
+  };
+  recognition.onerror = e => {
+    isRecording = false; btn.classList.remove('recording'); btn.textContent = '🎙';
+    recognition = null;
+    if (e.error === 'not-allowed') toast('⚠ Permiso de micrófono denegado', 'err');
+  };
+  recognition.start();
+}
+
+// ── CUÉNTAME → PDF ────────────────────────────────────────────
+function generarCuentame() {
+  const temas = Object.entries(temasData).sort(([,a],[,b]) => a.nombre.localeCompare(b.nombre));
+  if (!temas.length) { toast('⚠ No hay temas todavía', 'err'); return; }
+
+  // Por cada tema, ordenar sus chistes y coger la lista ordenada
+  const listas = temas.map(([, t]) => {
+    const chistes = t.chistes || {};
+    return Object.values(chistes)
+      .sort((a, b) => (a.orden ?? a.ts ?? 0) - (b.orden ?? b.ts ?? 0));
+  }).filter(l => l.length > 0);
+
+  if (!listas.length) { toast('⚠ No hay chistes todavía', 'err'); return; }
+
+  // Intercalar: primero de cada tema, segundo de cada tema...
+  const resultado = [];
+  let ronda = 0;
+  while (resultado.length < 25) {
+    let alguno = false;
+    for (const lista of listas) {
+      if (lista[ronda]) {
+        resultado.push(lista[ronda]);
+        alguno = true;
+        if (resultado.length >= 25) break;
+      }
+    }
+    if (!alguno) break;
+    ronda++;
+  }
+
+  if (!resultado.length) { toast('⚠ No hay chistes para generar', 'err'); return; }
+
+  // Generar PDF con jsPDF
+  generarPDF(resultado);
+}
+
+async function generarPDF(chistes) {
+  // Cargar jsPDF si no está
+  if (!window.jspdf) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const pageW  = 210;
+  const margin = 20;
+  const maxW   = pageW - margin * 2;
+  let y        = 30;
+
+  // Título
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.setTextColor(180, 100, 0);
+  doc.text('CHISTÓN — Los 25 Mejores', pageW / 2, y, { align: 'center' });
+  y += 8;
+
+  doc.setFontSize(10);
+  doc.setTextColor(120, 120, 120);
+  doc.setFont('helvetica', 'normal');
+  doc.text(new Date().toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' }), pageW / 2, y, { align: 'center' });
+  y += 12;
+
+  // Línea separadora
+  doc.setDrawColor(245, 197, 24);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, pageW - margin, y);
+  y += 10;
+
+  chistes.forEach((c, i) => {
+    // Comprobar si cabe al menos el título en la página
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+
+    // Número y nombre
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(180, 100, 0);
+    doc.text(`${i + 1}. ${c.nombre}`, margin, y);
+    y += 7;
+
+    // Texto del chiste
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(40, 40, 40);
+    const lineas = doc.splitTextToSize(c.texto || '', maxW);
+    lineas.forEach(linea => {
+      if (y > 275) { doc.addPage(); y = 20; }
+      doc.text(linea, margin, y);
+      y += 5.5;
+    });
+
+    y += 6; // Espacio entre chistes
+
+    // Línea separadora ligera
+    if (i < chistes.length - 1) {
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y - 3, pageW - margin, y - 3);
+    }
+  });
+
+  // Pie de página en última página
+  doc.setFontSize(8);
+  doc.setTextColor(160, 160, 160);
+  doc.text('Generado con CHISTÓN 😂', pageW / 2, 290, { align: 'center' });
+
+  doc.save('chiston_25_mejores.pdf');
+  toast('✓ PDF generado y descargado 🎉');
+}
+
+// ── EVENTOS ───────────────────────────────────────────────────
+document.getElementById('logo-btn').addEventListener('click', goHome);
+document.getElementById('back-chistes').addEventListener('click', goHome);
+document.getElementById('btn-add-chiste').addEventListener('click', openModalChiste);
+document.getElementById('btn-cuentame').addEventListener('click', generarCuentame);
+document.getElementById('btn-subir-top').addEventListener('click', subirUnaPos);
+
+document.getElementById('btn-save-tema').addEventListener('click', saveTema);
+document.getElementById('btn-cancel-tema').addEventListener('click', () => closeModal('m-tema'));
+document.getElementById('close-m-tema').addEventListener('click', () => closeModal('m-tema'));
+document.getElementById('inp-tema').addEventListener('keydown', e => { if(e.key==='Enter') saveTema(); });
+
+document.getElementById('btn-save-chiste').addEventListener('click', saveChiste);
+document.getElementById('btn-cancel-chiste').addEventListener('click', () => closeModal('m-chiste'));
+document.getElementById('close-m-chiste').addEventListener('click', () => closeModal('m-chiste'));
+document.getElementById('btn-mic-chiste').addEventListener('click', toggleVoz);
+document.getElementById('inp-chiste-nombre').addEventListener('keydown', e => {
+  if (e.key==='Enter') document.getElementById('inp-chiste-texto').focus();
+});
+
+// ── ARRANQUE ──────────────────────────────────────────────────
+suscribir();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js")
+      .then(r => console.log("SW:", r.scope))
+      .catch(e => console.log("SW error:", e));
+  });
+}
+</script>
+</body>
+</html>
